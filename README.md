@@ -54,7 +54,7 @@ new Vue({
 
 根据类图中提供的属性和方法去实现对应的功能,能让我们的目标更加清晰.
 
-![Image text](../static/03-vueRouter类图.png)
+![Image text](./src/assets/vueRouter.png)
 
 如上可见,这个名为**VueRouter**的类它有三个属性和六个方法.其中+号是对外公开的代码,_号是静态方法.
 
