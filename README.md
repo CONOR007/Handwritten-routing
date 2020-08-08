@@ -1,26 +1,16 @@
 # Vue 源码之手写Vue Router
 
-# 01-vue-router-basic-usage
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+**源码地址:**<https://github.com/CONOR007/Handwritten-routing>
 
 ## Vue Router的两种模式
 
-### hash实现模式原理
+### hash模式实现原理
 
 - URl中#后的内容作为路径地址
 - 监听`hashchange`事件
 - 根据当前路由地址找到对应的组件重新渲染
 
-### History实现模式原理
+### History模式实现原理
 
 - 通过`history.pushState()`方法改变地址栏
 - 监听`popstate`事件
@@ -70,9 +60,11 @@ new Vue({
 
 `install`是一个静态方法,用来实现vue的插件机制;
 
-`Constructor`构造函数是用来帮我们初始化对应的属性和方法;
+`Constructor`构造函数是用来初始化对应的属性;
 
-`init`和`initEvent`是用来注册popState事件监听浏览器历史的变化;
+`init`用来初始化功能方法;
+
+``initEvent`是用来注册popState事件监听浏览器历史的变化;
 
 `createRouteMap`是用来初始化routeMap属性的把传入的路由规则转换成键值对的形式存储到routeMap中去,键是路由的地址,值是路由的组件;
 
@@ -111,7 +103,6 @@ export default class VueRouter {
 		//初始化方法
   }
 }
-
 ```
 
 注意`this.$options`拿到的是Vue初始化时传入的对象.所以接下来我们在该类中实现的所有属性和方法都能在this.$options.router中拿到.
@@ -157,14 +148,14 @@ const router = new VueRouter({
 `options`参数就是new VueRouter时传入的对象 `{ mode: 'history', routes}`,其中`routeMap`是一个对象用来记录路由地址和组件的对应关系.
 
 ```js
-  constructor (options) {
-    this.options = options
-    this.routeMap = {}
-    // observable实现current的双向绑定
-    this.data = _Vue.observable({
-      current: '/'
-    })
-  }
+constructor (options) {
+  this.options = options
+  this.routeMap = {}
+  // observable实现current的双向绑定
+  this.data = _Vue.observable({
+    current: '/'
+  })
+}
 ```
 
 ### `createRouteMap`的实现
@@ -184,43 +175,43 @@ const router = new VueRouter({
 `initComponents`主要创建路由中所用到的`<route-link>`和`<route-view>`这两个组件.使用`.component`创建组件,`render`渲染组件,`h`函数创建目标元素或生成虚拟DOM.`clickHandler`用来实现路由的跳转,在历史模式中主要用到HTML5的`history.pushState`API ,作用是改变地址不会向服务端发起请求.
 
 ```js
-  initComponents (Vue) {
-    Vue.component('router-link', {
-      props: {
-        to: String
-      },
-      // template: '<a :href="to"><slot></slot></a>'
-      render (h) {
-        // h函数(生成的目标元素,目标元素属性,内容部分插槽)
-        return h('a',{
-          attrs : {
-            href : this.to
-          },
-          on : {
-            click:this.clickHandler
-          },
-        },[this.$slots.default])
-      },
-      methods: {
-        clickHandler (e) {
-          history.pushState({},'',this.to)
-          this.$router.data.current = this.to
-          //组织a标签的默认事件
-          e.preventDefault();
-        }
-      },
-    })
-    
-    const self = this
-    Vue.component('router-view', {
-      render(h) {
-        // component 当前路由地址
-        const component = self.routeMap[self.data.current]
-        // h可以帮我们创建虚拟DOM
-        return h(component)
-      },
-    })
-  }
+initComponents (Vue) {
+  Vue.component('router-link', {
+    props: {
+      to: String
+    },
+    // template: '<a :href="to"><slot></slot></a>'
+    render (h) {
+      // h函数(生成的目标元素,目标元素属性,内容部分插槽)
+      return h('a',{
+        attrs : {
+          href : this.to
+        },
+        on : {
+          click:this.clickHandler
+        },
+      },[this.$slots.default])
+    },
+    methods: {
+      clickHandler (e) {
+        history.pushState({},'',this.to)
+        this.$router.data.current = this.to
+        //组织a标签的默认事件
+        e.preventDefault();
+      }
+    },
+  })
+
+  const self = this
+  Vue.component('router-view', {
+    render(h) {
+      // component 当前路由地址
+      const component = self.routeMap[self.data.current]
+      // h可以帮我们创建虚拟DOM
+      return h(component)
+    },
+  })
+}
 ```
 
 这里要注意:完整版本的Vue支持template编译 运行时不支持template如果要使用需要在vue.config.js中配置 runtimeCompiler 或者配置render函数
@@ -230,21 +221,21 @@ const router = new VueRouter({
 `initEvent `用来注册popState事件监听浏览器历史的变化,也就是点击浏览器左上角回退时要更新组件
 
 ```js
-  initEvent () {
-    window.addEventListener('popstate',()=>{
-      this.data.current = window.location.pathname
-    })
-  }
+initEvent () {
+  window.addEventListener('popstate',()=>{
+    this.data.current = window.location.pathname
+  })
+}
 ```
 
 ### `init`初始化方法
 
 ```js
-  init () {
-    this.createRouteMap()
-    this.initComponents(_Vue)
-    this.initEvent()
-  }
+init () {
+  this.createRouteMap()
+  this.initComponents(_Vue)
+  this.initEvent()
+}
 ```
 
 ## 完整代码
@@ -338,7 +329,7 @@ export default class VueRouter {
         }
       },
     })
-    
+
     const self = this
     Vue.component('router-view', {
       render(h) {
@@ -363,10 +354,8 @@ export default class VueRouter {
 最后在路由中用上我们自己写的路由路径
 
 ```js
-import Vue from 'vue'
+...
 import VueRouter from '../vueRouter/index.js' //这里
-import Index from '../views/Index.vue'
-Vue.use(VueRouter)
 ...
 ```
 
