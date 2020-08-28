@@ -30,7 +30,7 @@ const routes = [
 ]
 // 2. 创建 router 对象
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'mode',
   routes
 })
 

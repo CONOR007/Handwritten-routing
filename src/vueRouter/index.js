@@ -19,7 +19,7 @@ export default class VueRouter {
           //     router,
           //     render: h => h(App)
           // }).$mount('#app')
-          // 实例化的时候 new Vue中的对象都放在$options中去了. 所以该类中所有属性方法都能在this.$options.router中拿到.          
+          // 实例化的时候 new Vue中的对象都放在$options中去了. 所以该类中所有属性方法都能在this.$options.router中拿到.
           _Vue.prototype.$router = this.$options.router
           this.$options.router.init()
         }
@@ -33,7 +33,7 @@ export default class VueRouter {
     // {
     //     mode: 'history',
     //     routes
-    // }    
+    // }
     // 是记录构造函数传入的对象,比如记录我们在new VueRouter的时候传入的routes对象规则;
     this.options = options
     // 是一个对象用来记录路由地址和组件的对应关系,将来我们会将options对应到routeMap中来
@@ -68,40 +68,63 @@ export default class VueRouter {
       // template: '<a :href="to"><slot></slot></a>'
       render (h) {
         // h函数(生成的目标元素,目标元素属性,内容部分插槽)
-        return h('a',{
-          attrs : {
-            href : this.to
+        return h('a', {
+          attrs: {
+            href: this.to
           },
-          on : {
-            click:this.clickHandler
-          },
-        },[this.$slots.default])
+          on: {
+            click: this.clickHandler
+          }
+        }, [this.$slots.default])
       },
       methods: {
         clickHandler (e) {
-          history.pushState({},'',this.to)
-          this.$router.data.current = this.to
-          //组织a标签的默认事件
-          e.preventDefault();
+          this.$router.mode(() => {
+            history.pushState({}, '', this.to)
+            this.$router.data.current = this.to
+          }, () => {
+            window.location.hash = this.to
+          })
+          // 组织a标签的默认事件
+          e.preventDefault()
         }
-      },
+      }
     })
-    
+
     const self = this
     Vue.component('router-view', {
-      render(h) {
+      render (h) {
         // component 当前路由地址
         const component = self.routeMap[self.data.current]
         // h可以帮我们创建虚拟DOM
         return h(component)
-      },
+      }
     })
   }
 
-  //initEvent 用来注册popState事件监听浏览器历史的变化
+  // initEvent 用来注册popState事件监听浏览器历史的变化
   initEvent () {
-    window.addEventListener('popstate',()=>{
-      this.data.current = window.location.pathname
+    const self = this
+    window.addEventListener('popstate', () => {
+      this.mode(() => {
+        self.data.current = window.location.pathname
+      }, () => {})
     })
+    window.addEventListener('hashchange', () => {
+      this.mode(() => {
+        self.data.current = window.location.pathname
+      }, () => {
+        if (self.data.current !== window.location.hash) self.data.current = window.location.hash.substr(1)
+      })
+    })
+  }
+
+  // 模式判断
+  mode (his, mode) {
+    if (this.options.mode === 'history') {
+      his()
+    } else if (this.options.mode === 'mode') {
+      mode()
+    }
   }
 }
